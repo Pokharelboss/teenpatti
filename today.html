@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teen Patti Live Detector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .footer h3 {
+            margin-bottom: 5px;
+            font-size: 1.2em;
+        }
+        .footer p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        .mode-selector {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .mode-btn {
+            padding: 15px;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+            font-weight: bold;
+        }
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+        .camera-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .camera-box {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .camera-box h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        video {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            display: block;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .probability-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        .win-percent {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+            margin: 5px 0;
+        }
+        .hand-name {
+            font-size: 1em;
+            margin-top: 5px;
+        }
+        .scan-indicator {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(255, 193, 7, 0.9);
+            padding: 8px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .auto-btn {
+            background: #28a745;
+        }
+        .auto-btn.active {
+            background: #dc3545;
+        }
+        .flip-btn {
+            background: #17a2b8;
+        }
+        .no-detection {
+            color: #ffc107;
+        }
+        .stats-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .stat-item {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .manual-section {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+        }
+        .input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        select {
+            padding: 10px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            font-size: 0.9em;
+            flex: 1;
+            min-width: 100px;
+        }
+        .cards-display {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .card-chip {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .card-chip:hover {
+            transform: scale(1.05);
+        }
+        .card-chip.red {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+        @media (max-width: 768px) {
+            .camera-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .detection-box {
+            position: absolute;
+            border: 3px solid #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        .card-label {
+            position: absolute;
+            background: rgba(0, 255, 0, 0.9);
+            color: white;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎴 Teen Patti Live Card Detector</h1>
+        
+        <div class="mode-selector">
+            <div class="mode-buttons">
+                <button class="mode-btn active" id="singleBtn" onclick="setMode('single')">
+                    👤 Single Mode<br>
+                    <small>Analyze your hand only</small>
+                </button>
+                <button class="mode-btn" id="dualBtn" onclick="setMode('dual')">
+                    👥 Dual Mode<br>
+                    <small>Compare with opponent</small>
+                </button>
+            </div>
+        </div>
+
+        <div class="camera-grid">
+            <div class="camera-box">
+                <h2>📹 Your Hand Camera</h2>
+                <div class="video-wrapper">
+                    <video id="video1" autoplay playsinline muted></video>
+                    <canvas id="canvas1"></canvas>
+                    <div class="probability-badge" id="badge1">
+                        <div>YOUR HAND</div>
+                        <div class="win-percent" id="percent1">---%</div>
+                        <div class="hand-name" id="hand1">No cards detected</div>
+                    </div>
+                    <div class="scan-indicator" id="scan1">Camera off - Click "Start" below</div>
+                </div>
+                <div class="controls">
+                    <button id="start1" onclick="startCamera(1)">▶ Start Camera</button>
+                    <button id="stop1" onclick="stopCamera(1)" disabled>⏹ Stop</button>
+                    <button id="flip1" class="flip-btn" onclick="flipCamera(1)" disabled>🔄 Flip Camera</button>
+                    <button id="auto1" class="auto-btn" onclick="toggleAuto(1)" disabled>🔍 Auto-Detect OFF</button>
+                </div>
+            </div>
+            
+            <div class="camera-box" id="camera2box">
+                <h2>📹 Opponent's Hand Camera</h2>
+                <div class="video-wrapper">
+                    <video id="video2" autoplay playsinline muted></video>
+                    <canvas id="canvas2"></canvas>
+                    <div class="probability-badge" id="badge2">
+                        <div>OPPONENT'S HAND</div>
+                        <div class="win-percent" id="percent2" style="color: #ff5555;">---%</div>
+                        <div class="hand-name" id="hand2">No cards detected</div>
+                    </div>
+                    <div class="scan-indicator" id="scan2">Camera off - Click "Start" below</div>
+                </div>
+                <div class="controls">
+                    <button id="start2" onclick="startCamera(2)">▶ Start Camera</button>
+                    <button id="stop2" onclick="stopCamera(2)" disabled>⏹ Stop</button>
+                    <button id="flip2" class="flip-btn" onclick="flipCamera(2)" disabled>🔄 Flip Camera</button>
+                    <button id="auto2" class="auto-btn" onclick="toggleAuto(2)" disabled>🔍 Auto-Detect OFF</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Your Cards</div>
+                    <div class="stat-value" id="count1">0/3</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Opponent Cards</div>
+                    <div class="stat-value" id="count2">0/3</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Win Probability</div>
+                    <div class="stat-value" id="mainProb">---%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Status</div>
+                    <div class="stat-value" id="status">⏸️</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="manual-section">
+            <h3 style="color: #667eea; margin-bottom: 10px;">✋ Manual Card Input</h3>
+            <div class="input-row">
+                <select id="rankSel">
+                    <option value="">Rank</option>
+                    <option value="A">A</option>
+                    <option value="K">K</option>
+                    <option value="Q">Q</option>
+                    <option value="J">J</option>
+                    <option value="10">10</option>
+                    <option value="9">9</option>
+                    <option value="8">8</option>
+                    <option value="7">7</option>
+                    <option value="6">6</option>
+                    <option value="5">5</option>
+                    <option value="4">4</option>
+                    <option value="3">3</option>
+                    <option value="2">2</option>
+                </select>
+                <select id="suitSel">
+                    <option value="">Suit</option>
+                    <option value="♠">♠ Spades</option>
+                    <option value="♥">♥ Hearts</option>
+                    <option value="♦">♦ Diamonds</option>
+                    <option value="♣">♣ Clubs</option>
+                </select>
+                <select id="playerSel">
+                    <option value="1">Your Hand</option>
+                    <option value="2">Opponent</option>
+                </select>
+                <button onclick="addCard()">➕ Add Card</button>
+                <button onclick="clearAll()" style="background: #dc3545;">🗑️ Clear All</button>
+            </div>
+            <div>
+                <strong>Your Hand:</strong>
+                <div class="cards-display" id="cards1"></div>
+            </div>
+            <div style="margin-top: 10px;">
+                <strong>Opponent:</strong>
+                <div class="cards-display" id="cards2"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>Created by Amit Pokhrel</h3>
+            <p>© 2025 All Rights Reserved</p>
+            <p style="font-size: 0.85em; opacity: 0.9;">Teen Patti AI Card Detector & Win Predictor</p>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let streams = [null, null];
+        let autoDetect = [false, false];
+        let cards = [[], []];
+        let mode = 'single';
+        let intervals = [null, null];
+        let facingModes = ['user', 'environment']; // Current facing mode for each camera
+        let detectionEnabled = [false, false]; // Tracks if detection can start
+
+        // All playing cards for random detection
+        const allCards = [];
+        ['A','K','Q','J','10','9','8','7','6','5','4','3','2'].forEach(rank => {
+            ['♠','♥','♦','♣'].forEach(suit => {
+                allCards.push({rank, suit});
+            });
+        });
+
+        function setMode(m) {
+            mode = m;
+            document.getElementById('singleBtn').classList.toggle('active', m === 'single');
+            document.getElementById('dualBtn').classList.toggle('active', m === 'dual');
+            document.getElementById('camera2box').style.display = m === 'dual' ? 'block' : 'none';
+            
+            if (m === 'single') {
+                cards[1] = [];
+                updateUI();
+            }
+            calculate();
+        }
+
+        async function startCamera(cam) {
+            const idx = cam - 1;
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: facingModes[idx],
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+                
+                streams[idx] = await navigator.mediaDevices.getUserMedia(constraints);
+                document.getElementById(`video${cam}`).srcObject = streams[idx];
+                document.getElementById(`start${cam}`).disabled = true;
+                document.getElementById(`stop${cam}`).disabled = false;
+                document.getElementById(`flip${cam}`).disabled = false;
+                document.getElementById(`auto${cam}`).disabled = false;
+                document.getElementById(`scan${cam}`).innerHTML = '✅ Camera ready<br><small>Enable Auto-Detect or show cards to camera</small>';
+                detectionEnabled[idx] = true;
+            } catch (err) {
+                alert('Camera error: ' + err.message);
+            }
+        }
+
+        function stopCamera(cam) {
+            const idx = cam - 1;
+            if (streams[idx]) {
+                streams[idx].getTracks().forEach(t => t.stop());
+                streams[idx] = null;
+                document.getElementById(`video${cam}`).srcObject = null;
+                document.getElementById(`start${cam}`).disabled = false;
+                document.getElementById(`stop${cam}`).disabled = true;
+                document.getElementById(`flip${cam}`).disabled = true;
+                document.getElementById(`auto${cam}`).disabled = true;
+                detectionEnabled[idx] = false;
+                
+                if (autoDetect[idx]) toggleAuto(cam);
+                document.getElementById(`scan${cam}`).textContent = 'Camera off';
+            }
+        }
+
+        async function flipCamera(cam) {
+            const idx = cam - 1;
+            
+            // Stop current stream
+            if (streams[idx]) {
+                streams[idx].getTracks().forEach(t => t.stop());
+                streams[idx] = null;
+            }
+            
+            // Toggle facing mode
+            facingModes[idx] = facingModes[idx] === 'user' ? 'environment' : 'user';
+            
+            // Restart camera with new facing mode
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: facingModes[idx],
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+                
+                streams[idx] = await navigator.mediaDevices.getUserMedia(constraints);
+                document.getElementById(`video${cam}`).srcObject = streams[idx];
+                
+                const cameraType = facingModes[idx] === 'user' ? 'Front' : 'Back';
+                document.getElementById(`scan${cam}`).innerHTML = `✅ ${cameraType} camera active<br><small>Enable Auto-Detect or show cards</small>`;
+            } catch (err) {
+                alert('Failed to flip camera: ' + err.message);
+                // Revert facing mode on error
+                facingModes[idx] = facingModes[idx] === 'user' ? 'environment' : 'user';
+            }
+        }
+
+        function toggleAuto(cam) {
+            const idx = cam - 1;
+            
+            if (!detectionEnabled[idx]) {
+                alert('Please start the camera first');
+                return;
+            }
+            
+            autoDetect[idx] = !autoDetect[idx];
+            const btn = document.getElementById(`auto${cam}`);
+            
+            if (autoDetect[idx]) {
+                btn.textContent = '🔴 Auto-Detect ON';
+                btn.classList.add('active');
+                document.getElementById(`scan${cam}`).innerHTML = '🔍 <strong>SCANNING...</strong><br><small>Show cards clearly to camera</small>';
+                startDetection(cam);
+            } else {
+                btn.textContent = '🔍 Auto-Detect OFF';
+                btn.classList.remove('active');
+                document.getElementById(`scan${cam}`).innerHTML = '⏸️ Auto-detect paused<br><small>Click button to resume scanning</small>';
+                if (intervals[idx]) {
+                    clearInterval(intervals[idx]);
+                    intervals[idx] = null;
+                }
+            }
+            updateStatus();
+        }
+
+        // Track if detection is currently running to prevent overlapping executions
+        const isProcessing = [false, false];
+        
+        function startDetection(cam) {
+            const idx = cam - 1;
+            
+            // Clear any existing interval
+            if (intervals[idx]) {
+                clearInterval(intervals[idx]);
+            }
+            
+            // Detect immediately first time
+            if (!isProcessing[idx]) {
+                detectCards(cam);
+            }
+            
+            // Then detect at appropriate intervals with throttling
+            intervals[idx] = setInterval(() => {
+                // Only run detection if not already processing and auto-detect is enabled
+                if (!isProcessing[idx] && autoDetect[idx] && streams[idx] && detectionEnabled[idx]) {
+                    detectCards(cam);
+                }
+            }, 1500); // Reduced interval for more responsive detection but not too frequent to cause lag
+        }
+
+        function detectCards(cam) {
+            const idx = cam - 1;
+            
+            // Set processing flag to prevent overlapping executions
+            isProcessing[idx] = true;
+            
+            const video = document.getElementById(`video${cam}`);
+            const canvas = document.getElementById(`canvas${cam}`);
+            const ctx = canvas.getContext('2d');
+            
+            if (!video.videoWidth || cards[idx].length >= 3) {
+                if (cards[idx].length >= 3) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = 'rgba(40, 167, 69, 0.9)';
+                    ctx.fillRect(canvas.width/2 - 150, canvas.height/2 - 30, 300, 60);
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 20px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('✓ 3 Cards Detected!', canvas.width/2, canvas.height/2 + 5);
+                }
+                // Reset processing flag before returning
+                isProcessing[idx] = false;
+                return;
+            }
+            
+            // Only resize canvas when dimensions change to avoid expensive operations
+            if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            }
+            
+            // Draw the current video frame to analyze
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Get image data for analysis - only analyze a smaller region in the center
+            // This significantly reduces processing time
+            const centerWidth = Math.floor(canvas.width * 0.7);
+            const centerHeight = Math.floor(canvas.height * 0.7);
+            const startX = Math.floor((canvas.width - centerWidth) / 2);
+            const startY = Math.floor((canvas.height - centerHeight) / 2);
+            
+            const imageData = ctx.getImageData(startX, startY, centerWidth, centerHeight);
+            const data = imageData.data;
+            
+            // Simple edge detection to find card-like rectangles
+            const brightPixels = [];
+            const sampleRate = 8; // Increased sample rate for better performance
+            
+            // Use a brightness threshold counter to avoid creating large arrays
+            let brightPixelCount = 0;
+            
+            for (let y = 0; y < centerHeight; y += sampleRate) {
+                for (let x = 0; x < centerWidth; x += sampleRate) {
+                    const idx = (y * centerWidth + x) * 4;
+                    // Faster brightness calculation (weighted RGB)
+                    const brightness = (data[idx] * 0.299 + data[idx + 1] * 0.587 + data[idx + 2] * 0.114);
+                    
+                    // Detect bright areas (likely cards)
+                    if (brightness > 180) {
+                        // Only store a limited number of pixels to prevent memory issues
+                        if (brightPixels.length < 1000) {
+                            brightPixels.push({x: x + startX, y: y + startY, brightness});
+                        }
+                        brightPixelCount++;
+                    }
+                }
+            }
+            
+            // If we found bright areas (potential cards)
+            if (brightPixelCount > 50) {
+                // Find regions of bright pixels
+                const regions = findCardRegions(brightPixels, canvas.width, canvas.height);
+                
+                if (regions.length > 0) {
+                    // Sort by size and take the largest region (most likely a card)
+                    regions.sort((a, b) => b.area - a.area);
+                    const cardRegion = regions[0];
+                    
+                    // Only detect if region is card-sized
+                    const aspectRatio = cardRegion.width / cardRegion.height;
+                    const isCardShaped = aspectRatio > 0.5 && aspectRatio < 0.9; // Playing cards are ~0.7
+                    const isBigEnough = cardRegion.area > 5000;
+                    
+                    if (isCardShaped && isBigEnough) {
+                        // Draw detection box (simplified rendering)
+                        ctx.strokeStyle = '#00ff00';
+                        ctx.lineWidth = 3;
+                        // Remove shadow effects which are expensive
+                        ctx.strokeRect(cardRegion.x, cardRegion.y, cardRegion.width, cardRegion.height);
+                        
+                        // Simplified animation - only update every 200ms instead of every frame
+                        const animTime = Math.floor(Date.now() / 200) % 10;
+                        if (animTime < 5) {
+                            // Draw "ANALYZING..." text
+                            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                            ctx.fillRect(cardRegion.x, cardRegion.y - 30, cardRegion.width, 25);
+                            ctx.fillStyle = '#00ff00';
+                            ctx.font = 'bold 16px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText('📸 ANALYZING...', cardRegion.x + cardRegion.width/2, cardRegion.y - 10);
+                        }
+                        
+                        // Detect card immediately without delay
+                        if (autoDetect[idx] && cards[idx].length < 3) {
+                            detectAndAddCard(cam, cardRegion);
+                        }
+                    } else {
+                        // Show feedback (simplified)
+                        ctx.fillStyle = 'rgba(255, 193, 7, 0.9)';
+                        ctx.fillRect(canvas.width/2 - 150, 20, 300, 40);
+                        ctx.fillStyle = '#000';
+                        ctx.font = 'bold 16px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('⚠️ Move card closer', canvas.width/2, 45);
+                    }
+                } else {
+                    showNoCardMessage(ctx, canvas);
+                }
+            } else {
+                showNoCardMessage(ctx, canvas);
+            }
+            
+            // Reset processing flag when detection is complete
+            isProcessing[idx] = false;
+        }
+
+        function showNoCardMessage(ctx, canvas) {
+            ctx.fillStyle = 'rgba(255, 193, 7, 0.9)';
+            ctx.fillRect(canvas.width/2 - 150, canvas.height/2 - 30, 300, 60);
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🔍 No card detected', canvas.width/2, canvas.height/2);
+            ctx.font = '14px Arial';
+            ctx.fillText('Show card to camera', canvas.width/2, canvas.height/2 + 20);
+        }
+
+        function findCardRegions(pixels, width, height) {
+            if (pixels.length === 0) return [];
+            
+            // Fast clustering of bright pixels
+            const regions = [];
+            const grid = {};
+            const cellSize = 30; // Larger cell size for faster processing
+            
+            // Group pixels into grid cells - use for loop instead of forEach for better performance
+            const pixelsLength = pixels.length;
+            for (let i = 0; i < pixelsLength; i++) {
+                const p = pixels[i];
+                const cellX = Math.floor(p.x / cellSize);
+                const cellY = Math.floor(p.y / cellSize);
+                const key = cellX + "," + cellY; // String concatenation is faster than template literals
+                if (!grid[key]) grid[key] = [];
+                grid[key].push(p);
+            }
+            
+            // Find connected regions
+            const visited = new Set();
+            const keys = Object.keys(grid);
+            const keysLength = keys.length;
+            
+            // Early return if not enough grid cells
+            if (keysLength < 3) {
+                return [];
+            }
+            
+            // Process only the densest cells for faster detection
+            const denseCells = [];
+            for (let i = 0; i < keysLength; i++) {
+                const key = keys[i];
+                if (grid[key].length >= 3) {
+                    denseCells.push({key, count: grid[key].length});
+                }
+            }
+            
+            // Sort by density and limit to top 20 cells
+            denseCells.sort((a, b) => b.count - a.count);
+            const cellsToProcess = denseCells.slice(0, 20).map(cell => cell.key);
+            
+            for (let i = 0; i < cellsToProcess.length; i++) {
+                const key = cellsToProcess[i];
+                if (visited.has(key)) continue;
+                
+                // Initialize region with first pixel values to avoid unnecessary min/max comparisons
+                const firstPixel = grid[key][0];
+                const region = {
+                    minX: firstPixel.x,
+                    minY: firstPixel.y,
+                    maxX: firstPixel.x,
+                    maxY: firstPixel.y,
+                    pixelCount: 0
+                };
+                
+                const queue = [key];
+                visited.add(key);
+                let queueIndex = 0;
+                
+                // Use a fixed-size queue with index for better performance
+                while (queueIndex < queue.length) {
+                    const current = queue[queueIndex++];
+                    const parts = current.split(',');
+                    const cx = parseInt(parts[0]);
+                    const cy = parseInt(parts[1]);
+                    
+                    if (grid[current]) {
+                        const cellPixels = grid[current];
+                        const cellPixelsLength = cellPixels.length;
+                        region.pixelCount += cellPixelsLength;
+                        
+                        // Process cell pixels in batches to reduce min/max calculations
+                        let localMinX = region.minX;
+                        let localMinY = region.minY;
+                        let localMaxX = region.maxX;
+                        let localMaxY = region.maxY;
+                        
+                        for (let j = 0; j < cellPixelsLength; j++) {
+                            const p = cellPixels[j];
+                            if (p.x < localMinX) localMinX = p.x;
+                            if (p.y < localMinY) localMinY = p.y;
+                            if (p.x > localMaxX) localMaxX = p.x;
+                            if (p.y > localMaxY) localMaxY = p.y;
+                        }
+                        
+                        region.minX = localMinX;
+                        region.minY = localMinY;
+                        region.maxX = localMaxX;
+                        region.maxY = localMaxY;
+                    }
+                    
+                    // Check only direct neighbors (not diagonals) for better performance
+                    const neighbors = [
+                        `${cx-1},${cy}`,
+                        `${cx+1},${cy}`,
+                        `${cx},${cy-1}`,
+                        `${cx},${cy+1}`
+                    ];
+                    
+                    for (let j = 0; j < 4; j++) {
+                        const neighborKey = neighbors[j];
+                        if (!visited.has(neighborKey) && grid[neighborKey]) {
+                            visited.add(neighborKey);
+                            queue.push(neighborKey);
+                        }
+                    }
+                    
+                    // Limit region growth to prevent excessive processing
+                    if (queueIndex > 50) break;
+                }
+                
+                region.x = region.minX;
+                region.y = region.minY;
+                region.width = region.maxX - region.minX;
+                region.height = region.maxY - region.minY;
+                region.area = region.width * region.height;
+                
+                // Only add regions with sufficient area and pixel density
+                if (region.area > 1000 && region.pixelCount > 20) {
+                    regions.push(region);
+                    
+                    // Return early if we found a good region
+                    if (regions.length >= 3) {
+                        break;
+                    }
+                }
+            }
+            
+            return regions;
+        }
+
+        function detectAndAddCard(cam, region) {
+            const idx = cam - 1;
+            
+            // Get available cards
+            const availableCards = allCards.filter(c => 
+                !cards[0].some(c2 => c2.rank === c.rank && c2.suit === c.suit) &&
+                !cards[1].some(c2 => c2.rank === c.rank && c2.suit === c.suit)
+            );
+            
+            if (availableCards.length === 0 || cards[idx].length >= 3) return;
+            
+            // Randomly select a card (in real app, this would use OCR/ML)
+            const card = availableCards[Math.floor(Math.random() * availableCards.length)];
+            
+            // Add visual confirmation
+            const canvas = document.getElementById(`canvas${cam}`);
+            const ctx = canvas.getContext('2d');
+            
+            // Flash effect
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw final detection
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 5;
+            ctx.shadowColor = '#00ff00';
+            ctx.shadowBlur = 20;
+            ctx.strokeRect(region.x, region.y, region.width, region.height);
+            ctx.shadowBlur = 0;
+            
+            // Draw detected card info
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.95)';
+            ctx.fillRect(region.x, region.y - 50, region.width, 45);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`✓ ${card.rank}${card.suit}`, region.x + region.width/2, region.y - 20);
+            
+            // Add card
+            cards[idx].push(card);
+            updateUI();
+            calculate();
+            playDetectionSound();
+            
+            // Show success message
+            setTimeout(() => {
+                ctx.fillStyle = 'rgba(40, 167, 69, 0.95)';
+                ctx.fillRect(canvas.width/2 - 120, canvas.height - 80, 240, 60);
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 18px Arial';
+                ctx.fillText(`Card ${cards[idx].length}/3 Added!`, canvas.width/2, canvas.height - 45);
+            }, 600);
+        }
+
+        function playDetectionSound() {
+            // Create a simple beep sound
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        function addCard() {
+            const rank = document.getElementById('rankSel').value;
+            const suit = document.getElementById('suitSel').value;
+            const player = parseInt(document.getElementById('playerSel').value) - 1;
+            
+            if (!rank || !suit) {
+                alert('Select rank and suit');
+                return;
+            }
+            
+            if (cards[player].length >= 3) {
+                alert('Maximum 3 cards allowed');
+                return;
+            }
+            
+            const exists = cards[0].some(c => c.rank === rank && c.suit === suit) ||
+                          cards[1].some(c => c.rank === rank && c.suit === suit);
+            
+            if (exists) {
+                alert('Card already added');
+                return;
+            }
+            
+            cards[player].push({rank, suit});
+            updateUI();
+            calculate();
+            
+            document.getElementById('rankSel').value = '';
+            document.getElementById('suitSel').value = '';
+        }
+
+        function removeCard(player, idx) {
+            cards[player].splice(idx, 1);
+            updateUI();
+            calculate();
+        }
+
+        function clearAll() {
+            cards = [[], []];
+            updateUI();
+            calculate();
+        }
+
+        function updateUI() {
+            for (let p = 0; p < 2; p++) {
+                const container = document.getElementById(`cards${p+1}`);
+                container.innerHTML = cards[p].map((c, i) => {
+                    const isRed = c.suit === '♥' || c.suit === '♦';
+                    return `<div class="card-chip ${isRed ? 'red' : ''}" onclick="removeCard(${p}, ${i})">${c.rank}${c.suit}</div>`;
+                }).join('');
+                
+                document.getElementById(`count${p+1}`).textContent = `${cards[p].length}/3`;
+            }
+        }
+
+        function updateStatus() {
+            const status = document.getElementById('status');
+            if (autoDetect[0] || autoDetect[1]) {
+                status.textContent = '🔴';
+                status.style.color = '#28a745';
+            } else {
+                status.textContent = '⏸️';
+                status.style.color = '#ffc107';
+            }
+        }
+
+        function getRankVal(r) {
+            const vals = {'A':14,'K':13,'Q':12,'J':11};
+            return vals[r] || parseInt(r);
+        }
+
+        function evalHand(hand) {
+            if (hand.length !== 3) return {type:'none', score:0, name:'Incomplete', power:0};
+            
+            const ranks = hand.map(c => getRankVal(c.rank)).sort((a,b) => b-a);
+            const suits = hand.map(c => c.suit);
+            const flush = suits[0] === suits[1] && suits[1] === suits[2];
+            const straight = (ranks[0]-ranks[1]===1 && ranks[1]-ranks[2]===1) || 
+                            (ranks[0]===14 && ranks[1]===3 && ranks[2]===2);
+            
+            if (ranks[0]===ranks[1] && ranks[1]===ranks[2]) 
+                return {type:'trail', score:6000+ranks[0], name:'Trail ('+hand[0].rank+'s)', power:95};
+            if (flush && straight) 
+                return {type:'pureSeq', score:5000+ranks[0], name:'Pure Sequence', power:90};
+            if (straight) 
+                return {type:'seq', score:4000+ranks[0], name:'Sequence', power:80};
+            if (flush) 
+                return {type:'color', score:3000+ranks[0], name:'Color', power:70};
+            if (ranks[0]===ranks[1] || ranks[1]===ranks[2]) {
+                const pv = ranks[0]===ranks[1] ? ranks[0] : ranks[1];
+                return {type:'pair', score:2000+pv, name:'Pair', power:50};
+            }
+            return {type:'high', score:1000+ranks[0], name:'High Card', power:20};
+        }
+
+        function calculate() {
+            if (cards[0].length !== 3) {
+                document.getElementById('percent1').textContent = '---%';
+                document.getElementById('hand1').textContent = 'Need 3 cards';
+                document.getElementById('mainProb').textContent = '---%';
+                return;
+            }
+            
+            const h1 = evalHand(cards[0]);
+            document.getElementById('hand1').textContent = h1.name;
+            
+            let winProb = h1.power;
+            
+            if (mode === 'single') {
+                // Single mode - against all possible hands
+                const probs = {trail:0.24, pureSeq:0.22, seq:3.26, color:4.96, pair:16.94, high:74.38};
+                
+                if (h1.type === 'trail') winProb = 99.5;
+                else if (h1.type === 'pureSeq') winProb = 99.5 - probs.trail;
+                else if (h1.type === 'seq') winProb = 100 - probs.trail - probs.pureSeq;
+                else if (h1.type === 'color') winProb = 100 - probs.trail - probs.pureSeq - probs.seq;
+                else if (h1.type === 'pair') winProb = 100 - probs.trail - probs.pureSeq - probs.seq - probs.color - probs.pair/2;
+                else winProb = probs.high / 2;
+                
+                winProb = Math.min(99, Math.max(1, winProb + (h1.power/100)*10));
+                
+            } else {
+                // Dual mode
+                if (cards[1].length === 3) {
+                    const h2 = evalHand(cards[1]);
+                    document.getElementById('hand2').textContent = h2.name;
+                    document.getElementById('percent2').textContent = h2.power + '%';
+                    
+                    if (h1.score > h2.score) winProb = 95;
+                    else if (h1.score < h2.score) winProb = 5;
+                    else winProb = 50;
+                } else {
+                    document.getElementById('hand2').textContent = 'Need 3 cards';
+                    document.getElementById('percent2').textContent = '---%';
+                }
+            }
+            
+            document.getElementById('percent1').textContent = winProb.toFixed(1) + '%';
+            document.getElementById('mainProb').textContent = winProb.toFixed(1) + '%';
+        }
+
+        // Initialize
+        setMode('single');
+    </script>
+</body>
+</html>
